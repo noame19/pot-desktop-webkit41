@@ -31,3 +31,6 @@ dist-ssr
 # pkg-config shims written by the build scripts
 .webkit41-shim/
 cargo.log
+
+# build output (scripts/package-*.sh write here)
+/target/

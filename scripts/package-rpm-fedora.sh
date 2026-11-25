@@ -159,8 +159,14 @@ rpmbuild --define "_topdir $topdir" --define "_sourcedir $topdir/SOURCES" \
 
 outdir=$root/target/rpm
 mkdir -p "$outdir"
-find "$topdir/RPMS" -name '*.rpm' -exec cp {} "$outdir/" \;
-rpmfile=$(find "$outdir" -maxdepth 1 -name '*.rpm' | head -1)
+# Only this architecture's package: a leftover from another matrix leg would
+# otherwise be picked up by the glob below.
+find "$outdir" -maxdepth 1 -name "pot-*-1*.$arch.rpm" -delete
+find "$topdir/RPMS" -name "*.rpm" -exec cp {} "$outdir/" \;
+rpmfile=$(find "$outdir" -maxdepth 1 -name "*.rpm" | head -1)
+# An unreadable file here means the copy above went wrong; stop before the
+# checksum records it as a real package.
+rpm -qp --qf '%{NAME}-%{VERSION}-%{RELEASE}.%{ARCH}\n' "$rpmfile" >/dev/null
 (cd "$outdir" && sha256sum "$(basename "$rpmfile")" > "$(basename "$rpmfile").sha256")
 rpm -qp --requires "$rpmfile"
 echo "$rpmfile"
