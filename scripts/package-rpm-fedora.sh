@@ -128,7 +128,9 @@ AutoReqProv: no
 Requires:   $requires
 Recommends: tesseract-langpack-eng
 Recommends: tesseract-langpack-chi_sim
-Recommends: google-noto-sans-cjk-fonts
+# No CJK font is recommended on purpose: every desktop that shows this app
+# already ships a Chinese font, and google-noto-sans-cjk-fonts alone would add
+# ~125 MiB to the transaction. Users who want it can install it themselves.
 
 %description
 Pot is a cross-platform translation and OCR tool built on Tauri. This build
