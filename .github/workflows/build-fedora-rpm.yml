@@ -1,0 +1,159 @@
+name: build-fedora-rpm
+
+# Native Fedora build. The runner is a fedora:<release> container, so the binary
+# links exactly the libraries that Fedora release ships (WebKitGTK 4.1,
+# libsoup3). The RPM is assembled by scripts/package-rpm-fedora.sh, which reads
+# the runtime dependencies back from the binary instead of using the Debian
+# package names in tauri.conf.json.
+on:
+  workflow_dispatch:
+    inputs:
+      fedora_release:
+        description: 'Fedora release to build for'
+        default: '44'
+        required: true
+  push:
+    tags: ['v*']
+  pull_request:
+    paths:
+      - '.github/workflows/build-fedora-rpm.yml'
+      - 'scripts/setup-webkit41-fedora.sh'
+      - 'scripts/package-rpm-fedora.sh'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: fedora-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    container: fedora:${{ github.event.inputs.fedora_release || '44' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+            target: x86_64-unknown-linux-gnu
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+            target: aarch64-unknown-linux-gnu
+
+    steps:
+      # Fedora 44 dropped the unversioned nodejs/npm packages: the
+      # interpreters are split into nodejsNN / -bin / -npm-bin, and
+      # curl-minimal no longer exists.
+      - name: Install build dependencies
+        run: |
+          dnf -y install --setopt=install_weak_deps=False \
+            @development-tools gcc gcc-c++ make git tar gzip xz \
+            pkgconf-pkg-config findutils which file \
+            openssl-devel gtk3-devel \
+            webkit2gtk4.1-devel javascriptcoregtk4.1-devel \
+            libsoup3-devel \
+            libappindicator-gtk3-devel \
+            libayatana-appindicator-gtk3-devel \
+            librsvg2-devel libxdo-devel libXrandr-devel \
+            libxcb-devel libX11-devel \
+            fontconfig-devel freetype-devel expat-devel \
+            rpm-build rpmdevtools binutils \
+            curl ca-certificates \
+            nodejs22 nodejs22-bin nodejs22-npm-bin nodejs22-npm
+          dnf -y clean all
+
+      - uses: actions/checkout@v4
+
+      - name: Report the toolchain
+        run: |
+          . /etc/os-release; echo "building on $PRETTY_NAME"
+          gcc --version | head -1
+          pkg-config --modversion webkit2gtk-4.1 javascriptcoregtk-4.1
+
+      # Pinned on purpose: wl-clipboard-rs 0.8.1 (pulled in by arboard)
+      # does not compile on newer compilers — `!` no longer implements
+      # FromIterator<()> after the type-inference change tracked in
+      # rust-lang/rust#148922. This is the toolchain the upstream release
+      # was built and tested with.
+      - uses: dtolnay/rust-toolchain@1.99.1
+
+      - name: Record the toolchain
+        run: rustc -vV
+
+      - name: Point the removed WebKitGTK 4.0 lookups at 4.1
+        run: bash scripts/setup-webkit41-fedora.sh
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install frontend dependencies
+        run: |
+          git config --global --add safe.directory "$PWD"
+          pnpm install --frozen-lockfile
+
+      - name: Build frontend
+        run: pnpm build
+
+      - name: Compile the app
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/.webkit41-shim
+        run: |
+          set -o pipefail
+          if ! cargo build --release --features custom-protocol \
+                --manifest-path src-tauri/Cargo.toml \
+                > /tmp/cargo.log 2>&1; then
+            grep -E '^error' -A 6 /tmp/cargo.log | head -80 || true
+            tail -n 40 /tmp/cargo.log
+            while IFS= read -r line; do echo "::error::$line"; done \
+              < <(grep -E '^error' /tmp/cargo.log | head -5 | cut -c1-400)
+            cp /tmp/cargo.log cargo.log
+            exit 1
+          fi
+          tail -n 5 /tmp/cargo.log
+
+      - name: Keep the compiler log if the build broke
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cargo-log-${{ matrix.arch }}
+          path: cargo.log
+          if-no-files-found: ignore
+
+      - name: Build the RPM with Fedora dependency names
+        env:
+          BIN: src-tauri/target/release/pot
+        run: bash scripts/package-rpm-fedora.sh
+
+      - name: Verify the package
+        run: |
+          rpmfile=$(find target/rpm -maxdepth 1 -name '*.rpm' | head -1)
+          echo "== DT_NEEDED still unresolved =="
+          if ldd src-tauri/target/release/pot | grep 'not found'; then
+            exit 1
+          fi
+          echo "== Requires =="
+          rpm -qp --requires "$rpmfile"
+          echo "== installs cleanly =="
+          dnf -y install "$rpmfile"
+          rpm -q pot
+          echo "== tray library present =="
+          ldconfig -p | grep -c appindicator3 || true
+
+      - name: Collect packages
+        run: |
+          mkdir -p artifacts
+          cp target/rpm/*.rpm target/rpm/*.sha256 artifacts/
+          ls -la artifacts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pot-fedora-rpm-${{ matrix.arch }}
+          path: artifacts/*
+          if-no-files-found: error
+
+      - name: Attach to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: artifacts/*
+          fail_on_unmatched_files: false

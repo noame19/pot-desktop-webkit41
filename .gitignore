@@ -27,3 +27,7 @@ dist-ssr
 
 # qemu core dumps from emulated builds
 *.core
+
+# pkg-config shims written by the build scripts
+.webkit41-shim/
+cargo.log

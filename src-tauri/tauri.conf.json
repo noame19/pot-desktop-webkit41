@@ -89,10 +89,11 @@
             },
             "rpm": {
                 "depends": [
-                    "libxdo-dev",
-                    "libxcb1",
-                    "libxrandr2",
-                    "tesseract-ocr"
+                    "webkit2gtk4.1",
+                    "libsoup3",
+                    "gtk3",
+                    "tesseract",
+                    "libayatana-appindicator-gtk3"
                 ]
             },
             "macOS": {

@@ -5,145 +5,148 @@ name: build-linux
 # nothing runs under qemu, so the produced binaries link exactly the libraries
 # of the runner image.
 on:
-  workflow_dispatch:
-  push:
-    tags: ['v*']
-  pull_request:
-    paths:
-      - '.github/workflows/build-linux.yml'
-      - 'scripts/**'
-      - 'src-tauri/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
+    workflow_dispatch:
+    push:
+        tags: ['v*']
+    pull_request:
+        paths:
+            - '.github/workflows/build-linux.yml'
+            - 'scripts/**'
+            - 'src-tauri/**'
+            - 'package.json'
+            - 'pnpm-lock.yaml'
 
 permissions:
-  contents: write
+    contents: write
 
 jobs:
-  build:
-    name: linux-${{ matrix.arch }}
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - runner: ubuntu-24.04
-            arch: amd64
-            target: x86_64-unknown-linux-gnu
-            appimage: true
-          - runner: ubuntu-24.04-arm
-            arch: arm64
-            target: aarch64-unknown-linux-gnu
-            appimage: false # linuxdeploy/AppImage tooling has no reliable arm64 support
-    steps:
-      - uses: actions/checkout@v4
+    build:
+        name: linux-${{ matrix.arch }}
+        runs-on: ${{ matrix.runner }}
+        strategy:
+            fail-fast: false
+            matrix:
+                include:
+                    - runner: ubuntu-24.04
+                      arch: amd64
+                      target: x86_64-unknown-linux-gnu
+                      appimage: true
+                    - runner: ubuntu-24.04-arm
+                      arch: arm64
+                      target: aarch64-unknown-linux-gnu
+                      appimage: false # linuxdeploy/AppImage tooling has no reliable arm64 support
+        steps:
+            - uses: actions/checkout@v4
 
-      - name: Install WebKitGTK 4.1 build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
-            build-essential pkg-config libssl-dev \
-            libgtk-3-dev libwebkit2gtk-4.1-dev libjavascriptcoregtk-4.1-dev \
-            libsoup-3.0-dev libsoup2.4-dev libayatana-appindicator3-dev librsvg2-dev \
-            file imagemagick rpm squashfs-tools libfuse2t64
+            - name: Install WebKitGTK 4.1 build dependencies
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y --no-install-recommends \
+                    build-essential pkg-config libssl-dev \
+                    libgtk-3-dev libwebkit2gtk-4.1-dev libjavascriptcoregtk-4.1-dev \
+                    libsoup-3.0-dev libsoup2.4-dev libayatana-appindicator3-dev librsvg2-dev \
+                    file imagemagick rpm squashfs-tools libfuse2t64
 
-      - name: Point the removed 4.0 lookups at WebKitGTK 4.1
-        run: bash scripts/setup-webkit41.sh
+            - name: Point the removed 4.0 lookups at WebKitGTK 4.1
+              run: bash scripts/setup-webkit41.sh
 
-      - name: Expose the pkg-config shim
-        run: echo "PKG_CONFIG_PATH=$PWD/.webkit41-shim" >> "$GITHUB_ENV"
+            - name: Expose the pkg-config shim
+              run: echo "PKG_CONFIG_PATH=$PWD/.webkit41-shim" >> "$GITHUB_ENV"
 
-      # Pinned on purpose: wl-clipboard-rs 0.8.1 (pulled in by arboard) does not
-      # compile on newer compilers — `!` no longer implements FromIterator<()>
-      # after the type-inference change tracked in rust-lang/rust#148922. 1.99.1
-      # is the version the packages in the release were built and tested with.
-      - uses: dtolnay/rust-toolchain@1.99.1
-      - name: Record the toolchain
-        run: rustc -vV
-      - uses: Swatinem/rust-cache@v2
-        with:
-          key: linux-${{ matrix.arch }}
+            # Pinned on purpose: wl-clipboard-rs 0.8.1 (pulled in by arboard) does not
+            # compile on newer compilers — `!` no longer implements FromIterator<()>
+            # after the type-inference change tracked in rust-lang/rust#148922. 1.99.1
+            # is the version the packages in the release were built and tested with.
+            - uses: dtolnay/rust-toolchain@1.99.1
+            - name: Record the toolchain
+              run: rustc -vV
+            - uses: Swatinem/rust-cache@v2
+              with:
+                  key: linux-${{ matrix.arch }}
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
+            - uses: pnpm/action-setup@v4
+              with:
+                  version: 9
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+                  cache: pnpm
 
-      - name: Install frontend dependencies
-        run: pnpm install --frozen-lockfile
+            - name: Install frontend dependencies
+              run: pnpm install --frozen-lockfile
 
-      - name: Build frontend
-        run: pnpm build
+            - name: Build frontend
+              run: pnpm build
 
-      - name: Compile the app
-        run: |
-          set -o pipefail
-          if ! cargo build --release --features custom-protocol --manifest-path src-tauri/Cargo.toml > /tmp/cargo.log 2>&1; then
-            grep -E '^error' -A 6 /tmp/cargo.log | head -80 || true
-            tail -n 40 /tmp/cargo.log
-            # The Actions log download endpoint is unreachable from some
-            # networks; annotations travel over api.github.com and carry the
-            # first compiler errors with them.
-            while IFS= read -r line; do echo "::error::$line"; done < <(grep -E '^error' /tmp/cargo.log | head -5 | cut -c1-400)
-            cp /tmp/cargo.log cargo.log
-            exit 1
-          fi
-          tail -n 5 /tmp/cargo.log
+            - name: Compile the app
+              run: |
+                  set -o pipefail
+                  if ! cargo build --release --features custom-protocol --manifest-path src-tauri/Cargo.toml > /tmp/cargo.log 2>&1; then
+                    grep -E '^error' -A 6 /tmp/cargo.log | head -80 || true
+                    tail -n 40 /tmp/cargo.log
+                    # The Actions log download endpoint is unreachable from some
+                    # networks; annotations travel over api.github.com and carry the
+                    # first compiler errors with them.
+                    while IFS= read -r line; do echo "::error::$line"; done < <(grep -E '^error' /tmp/cargo.log | head -5 | cut -c1-400)
+                    cp /tmp/cargo.log cargo.log
+                    exit 1
+                  fi
+                  tail -n 5 /tmp/cargo.log
 
-      - name: Keep the compiler log if the build broke
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cargo-log-${{ matrix.arch }}
-          path: cargo.log
-          if-no-files-found: ignore
+            - name: Keep the compiler log if the build broke
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: cargo-log-${{ matrix.arch }}
+                  path: cargo.log
+                  if-no-files-found: ignore
 
-      - name: Build the .deb with dpkg -S derived dependencies
-        run: bash scripts/package-deb.sh
+            - name: Build the .deb with dpkg -S derived dependencies
+              run: bash scripts/package-deb.sh
 
-      - name: Build the Arch package (.pkg.tar.zst)
-        run: bash scripts/package-arch.sh
+            - name: Build the Arch package (.pkg.tar.zst)
+              run: bash scripts/package-arch.sh
 
-      # The Tauri 1 bundler is only used for rpm/AppImage here: its .deb
-      # dependency table is written for WebKitGTK 4.0. Kept separate and
-      # non-blocking so a bundler problem never costs us the .deb.
-      - name: Build RPM (and AppImage on x86_64)
-        continue-on-error: true
-        run: |
-          set -o pipefail
-          bundles=rpm
-          if [[ "${{ matrix.appimage }}" == "true" ]]; then bundles=rpm,appimage; fi
-          if ! pnpm tauri build --target ${{ matrix.target }} --bundles "$bundles" --verbose > /tmp/bundler.log 2>&1; then
-            tail -n 40 /tmp/bundler.log
-            echo "::error::tauri bundler failed ($bundles): $(grep -m3 -iE 'error|cannot|failed' /tmp/bundler.log | tr '\n' ' ' | cut -c1-400)"
-            exit 1
-          fi
-          tail -n 15 /tmp/bundler.log
+            # The Tauri 1 bundler is only used for the AppImage here. Its .deb and
+            # .rpm dependency tables are written for WebKitGTK 4.0 / Debian package
+            # names, so those formats are produced by scripts/package-*.sh instead
+            # (Fedora RPMs come from the build-fedora-rpm workflow).
+            - name: Build the AppImage on x86_64
+              if: matrix.appimage
+              continue-on-error: true
+              run: |
+                  set -o pipefail
+                  if ! pnpm tauri build --target ${{ matrix.target }} \
+                        --bundles appimage --verbose > /tmp/bundler.log 2>&1; then
+                    tail -n 40 /tmp/bundler.log
+                    echo "::error::tauri bundler failed (appimage)"
+                    exit 1
+                  fi
+                  tail -n 15 /tmp/bundler.log
 
-      - name: Collect packages
-        run: |
-          mkdir -p artifacts
-          cp target/deb/*.deb target/deb/*.sha256 artifacts/ 2>/dev/null || true
-          cp target/arch/*.pkg.tar.zst target/arch/*.pkg.tar.zst.sha256 artifacts/ 2>/dev/null || true
-          find src-tauri/target/${{ matrix.target }}/release/bundle -name '*.rpm' -exec cp {} artifacts/ \; 2>/dev/null || true
-          if [[ "${{ matrix.appimage }}" == "true" ]]; then
-            find src-tauri/target/${{ matrix.target }}/release/bundle -name '*.AppImage*' -exec cp {} artifacts/ \; 2>/dev/null || true
-          fi
-          ls -la artifacts
-          test -n "$(ls -A artifacts)" || { echo "::error::no packages produced"; exit 1; }
+            - name: Collect packages
+              run: |
+                  mkdir -p artifacts
+                  cp target/deb/*.deb target/deb/*.sha256 artifacts/ 2>/dev/null || true
+                  cp target/arch/*.pkg.tar.zst \
+                     target/arch/*.pkg.tar.zst.sha256 artifacts/ 2>/dev/null || true
+                  if [[ "${{ matrix.appimage }}" == "true" ]]; then
+                    find src-tauri/target/${{ matrix.target }}/release/bundle \
+                      -name '*.AppImage*' -exec cp {} artifacts/ \; 2>/dev/null || true
+                  fi
+                  ls -la artifacts
+                  test -n "$(ls -A artifacts)" || {
+                    echo "::error::no packages produced"; exit 1; }
 
-      - uses: actions/upload-artifact@v4
-        with:
-          name: pot-linux-${{ matrix.arch }}
-          path: artifacts/*
-          if-no-files-found: error
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: pot-linux-${{ matrix.arch }}
+                  path: artifacts/*
+                  if-no-files-found: error
 
-      - name: Attach to the release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: artifacts/*
-          fail_on_unmatched_files: false
+            - name: Attach to the release
+              if: startsWith(github.ref, 'refs/tags/v')
+              uses: softprops/action-gh-release@v2
+              with:
+                  files: artifacts/*
+                  fail_on_unmatched_files: false
