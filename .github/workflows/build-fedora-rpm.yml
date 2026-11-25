@@ -50,7 +50,12 @@ jobs:
             pkgconf-pkg-config findutils which file \
             openssl-devel gtk3-devel \
             webkit2gtk4.1-devel javascriptcoregtk4.1-devel \
-            libsoup3-devel \
+            libsoup3-devel libsoup-devel \
+            # libsoup-devel (the 2.4 line) is only needed because the
+            # vendored soup2-sys crate still carries
+            # [link(name = "soup-2.4")]. -Wl,--as-needed drops it from
+            # DT_NEEDED because nothing references its symbols, and the
+            # verify step below fails if it survives.
             libappindicator-gtk3-devel \
             libayatana-appindicator-gtk3-devel \
             librsvg2-devel libxdo-devel libXrandr-devel \
@@ -130,6 +135,11 @@ jobs:
           echo "== DT_NEEDED still unresolved =="
           if ldd src-tauri/target/release/pot | grep 'not found'; then
             exit 1
+          fi
+          echo "== libsoup2 must stay out of DT_NEEDED =="
+          if readelf -d src-tauri/target/release/pot |
+              grep 'soup-2\.4'; then
+            echo "::error::libsoup2 would abort next to libsoup3"; exit 1
           fi
           echo "== Requires =="
           rpm -qp --requires "$rpmfile"
