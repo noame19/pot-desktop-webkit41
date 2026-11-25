@@ -44,6 +44,11 @@ jobs:
       # interpreters are split into nodejsNN / -bin / -npm-bin, and
       # curl-minimal no longer exists.
       - name: Install build dependencies
+        # libsoup-devel (the 2.4 line) is only needed because the
+        # vendored soup2-sys crate still carries
+        # [link(name = "soup-2.4")]. -Wl,--as-needed drops it from
+        # DT_NEEDED because nothing references its symbols, and the
+        # verify step below fails if it ever survives into the binary.
         run: |
           dnf -y install --setopt=install_weak_deps=False \
             @development-tools gcc gcc-c++ make git tar gzip xz \
@@ -51,11 +56,6 @@ jobs:
             openssl-devel gtk3-devel \
             webkit2gtk4.1-devel javascriptcoregtk4.1-devel \
             libsoup3-devel libsoup-devel \
-            # libsoup-devel (the 2.4 line) is only needed because the
-            # vendored soup2-sys crate still carries
-            # [link(name = "soup-2.4")]. -Wl,--as-needed drops it from
-            # DT_NEEDED because nothing references its symbols, and the
-            # verify step below fails if it survives.
             libappindicator-gtk3-devel \
             libayatana-appindicator-gtk3-devel \
             librsvg2-devel libxdo-devel libXrandr-devel \
