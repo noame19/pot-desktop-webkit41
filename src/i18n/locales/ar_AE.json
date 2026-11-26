@@ -257,9 +257,6 @@
             "help": "إرشاد التكوين",
             "no_need": "لا يتطلب أي تكوين",
             "translate": {
-                "lingva": {
-                    "title": "lingva"
-                },
                 "deepl": {
                     "title": "DeepL",
                     "custom_url": "عنوان DeepLX",
@@ -376,9 +373,6 @@
                     "law": "القوانين واللوائح",
                     "contract": "عقد"
                 },
-                "bing_dict": {
-                    "title": "قاموس بينغ"
-                },
                 "cambridge_dict": {
                     "title": "قاموس كامبريدج"
                 },
@@ -388,12 +382,7 @@
                 }
             },
             "instance_name": "اسم التكوين",
-            "tts": {
-                "lingva_tts": {
-                    "request_path": "مسار الطلب",
-                    "title": "مترجم النصوص لينجفا"
-                }
-            },
+            "tts": {},
             "recognize": {
                 "tencent_accurate_ocr": {
                     "secret_id": "المعرف السري",

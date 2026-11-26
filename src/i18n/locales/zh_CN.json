@@ -242,9 +242,6 @@
                     "title": "谷歌翻译",
                     "custom_url": "自定义 URL"
                 },
-                "lingva": {
-                    "title": "Lingva"
-                },
                 "bing": {
                     "title": "必应翻译"
                 },
@@ -348,9 +345,6 @@
                     "appkey": "App ID",
                     "key": "Key"
                 },
-                "bing_dict": {
-                    "title": "必应词典"
-                },
                 "cambridge_dict": {
                     "title": "剑桥词典"
                 },
@@ -432,12 +426,7 @@
                     "title": "二维码识别"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "请求地址"
-                }
-            },
+            "tts": {},
             "collection": {
                 "anki": {
                     "title": "Anki",

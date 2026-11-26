@@ -401,9 +401,6 @@
                     "appkey": "App ID",
                     "key": "Ключ"
                 },
-                "bing_dict": {
-                    "title": "Словник Bing"
-                },
                 "cambridge_dict": {
                     "title": "Словник Cambridge"
                 },
@@ -427,17 +424,9 @@
                 },
                 "ecdict": {
                     "title": "ECDict (Онлайн)"
-                },
-                "lingva": {
-                    "title": "Lingva"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "Шлях запиту"
-                }
-            },
+            "tts": {},
             "instance_name": "Назва конфігурації"
         },
         "translate": {

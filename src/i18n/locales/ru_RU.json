@@ -242,9 +242,6 @@
                     "title": "Google",
                     "custom_url": "Пользовательский адрес"
                 },
-                "lingva": {
-                    "title": "Lingva"
-                },
                 "bing": {
                     "title": "Bing"
                 },
@@ -311,9 +308,6 @@
                     "title": "Youdao",
                     "appkey": "App ID",
                     "key": "Key"
-                },
-                "bing_dict": {
-                    "title": "Bing Dictionary"
                 },
                 "cambridge_dict": {
                     "title": "Кембриджский словарь"
@@ -432,12 +426,7 @@
                     "title": "QR-код"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "Путь запроса"
-                }
-            },
+            "tts": {},
             "collection": {
                 "anki": {
                     "title": "Anki",

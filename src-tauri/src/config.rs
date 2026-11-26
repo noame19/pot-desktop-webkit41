@@ -73,13 +73,11 @@ pub fn check_service_available() -> Result<(), Error> {
         "baidu",
         "baidu_field",
         "bing",
-        "bing_dict",
         "caiyun",
         "cambridge_dict",
         "chatglm",
         "deepl",
         "ecdict",
-        "lingva",
         "geminipro",
         "niutrans",
         "ollama",
@@ -91,7 +89,7 @@ pub fn check_service_available() -> Result<(), Error> {
         "yandex",
         "youdao",
     ];
-    let builtin_tts_list: Vec<&str> = vec!["lingva_tts"];
+    let builtin_tts_list: Vec<&str> = vec![];
     let builtin_collection_list: Vec<&str> = vec!["anki", "eudic"];
 
     let plugin_recognize_list: Vec<String> = get_plugin_list("recognize").unwrap_or_default();

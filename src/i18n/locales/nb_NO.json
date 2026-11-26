@@ -4,11 +4,7 @@
             "ok": "Ok"
         },
         "services": {
-            "translate": {
-                "lingva": {
-                    "title": "Lingva"
-                }
-            }
+            "translate": {}
         }
     }
 }

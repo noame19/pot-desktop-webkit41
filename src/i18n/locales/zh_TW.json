@@ -242,9 +242,6 @@
                     "title": "Google 翻譯",
                     "custom_url": "自訂網址"
                 },
-                "lingva": {
-                    "title": "Lingva"
-                },
                 "bing": {
                     "title": "Bing 翻譯"
                 },
@@ -322,9 +319,6 @@
                     "title": "有道翻譯",
                     "appkey": "應用程式 ID",
                     "key": "Key"
-                },
-                "bing_dict": {
-                    "title": "必應詞典"
                 },
                 "cambridge_dict": {
                     "title": "劍橋詞典"
@@ -429,12 +423,7 @@
                     "title": "QR Code"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "請求路徑"
-                }
-            },
+            "tts": {},
             "collection": {
                 "anki": {
                     "title": "Anki",

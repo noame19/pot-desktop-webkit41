@@ -104,15 +104,9 @@
                 "yandex": {
                     "title": "Yandex"
                 },
-                "bing_dict": {
-                    "title": "Dizionario Bing"
-                },
                 "volcengine": {
                     "appid": "ID app",
                     "secret": "Segreto"
-                },
-                "lingva": {
-                    "title": "Lingva"
                 },
                 "bing": {
                     "title": "Bing"
@@ -200,12 +194,7 @@
                     "name": "Nome della raccolta"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "Percorso richiesto"
-                }
-            }
+            "tts": {}
         },
         "languages": {
             "mn_cy": "Mongolo (Cirillico)",

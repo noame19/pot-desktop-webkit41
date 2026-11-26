@@ -242,9 +242,6 @@
                     "title": "Google",
                     "custom_url": "Custom URL"
                 },
-                "lingva": {
-                    "title": "Lingva"
-                },
                 "bing": {
                     "title": "Bing"
                 },
@@ -348,9 +345,6 @@
                     "appkey": "App ID",
                     "key": "Key"
                 },
-                "bing_dict": {
-                    "title": "Bing Dictionary"
-                },
                 "cambridge_dict": {
                     "title": "Cambridge Dictionary"
                 },
@@ -432,12 +426,7 @@
                     "title": "QR Code"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "Request Path"
-                }
-            },
+            "tts": {},
             "collection": {
                 "anki": {
                     "title": "Anki",

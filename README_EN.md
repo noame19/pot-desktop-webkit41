@@ -98,7 +98,6 @@
 -   [x] [Youdao](https://ai.youdao.com/)
 -   [x] [Cambridge Dictionary](https://dictionary.cambridge.org/)
 -   [x] [Yandex](https://translate.yandex.com/)
--   [x] [Lingva](https://github.com/TheDavidDelta/lingva-translate) ([Plugin](https://github.com/pot-app/pot-app-translate-plugin-template))
 -   [x] [Tatoeba](https://tatoeba.org/) ([Plugin](https://github.com/pot-app/pot-app-translate-plugin-tatoeba))
 -   [x] [ECDICT](https://github.com/skywind3000/ECDICT) ([Plugin](https://github.com/pot-app/pot-app-translate-plugin-ecdict))
 
@@ -125,8 +124,6 @@ More Services see [Plugin System](#plugin-system)
 More Services see [Plugin System](#plugin-system)
 
 ## Text-to-Speech
-
--   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
 
 More Services see [Plugin System](#plugin-system)
 

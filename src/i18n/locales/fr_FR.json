@@ -100,12 +100,6 @@
                 "yandex": {
                     "title": "Yandex"
                 },
-                "bing_dict": {
-                    "title": "Dictionnaire Bing"
-                },
-                "lingva": {
-                    "title": "Lingva"
-                },
                 "bing": {
                     "title": "Bing"
                 },
@@ -219,12 +213,7 @@
                     "title": "Eudic"
                 }
             },
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva",
-                    "request_path": "Chemin de la requête"
-                }
-            }
+            "tts": {}
         },
         "languages": {
             "mn_cy": "Mongolien (Cyrillique)",

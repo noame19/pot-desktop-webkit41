@@ -245,9 +245,6 @@
                 "youdao": {
                     "title": "Youdao"
                 },
-                "bing_dict": {
-                    "title": "Diccionario Bing"
-                },
                 "deepl": {
                     "deeplx": "DeepLX",
                     "free": "Gratis",
@@ -271,9 +268,6 @@
                 },
                 "tencent": {
                     "title": "Tencent"
-                },
-                "lingva": {
-                    "title": "Lingva"
                 },
                 "bing": {
                     "title": "Bing"
@@ -316,11 +310,7 @@
                 }
             },
             "help": "Guía de configuración",
-            "tts": {
-                "lingva_tts": {
-                    "title": "Lingva"
-                }
-            }
+            "tts": {}
         },
         "translate": {
             "speak": "Hablar",

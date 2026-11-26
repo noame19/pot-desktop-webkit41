@@ -130,7 +130,6 @@ Ubuntu 24.04+、Fedora 40+、Arch 等早已移除该库，因此上游源码在�
 -   [x] [有道翻译](https://ai.youdao.com/)
 -   [x] [剑桥词典](https://dictionary.cambridge.org/)
 -   [x] [Yandex](https://translate.yandex.com/)
--   [x] [Lingva](https://github.com/TheDavidDelta/lingva-translate) ([插件](https://github.com/pot-app/pot-app-translate-plugin-template))
 -   [x] [Tatoeba](https://tatoeba.org/) ([插件](https://github.com/pot-app/pot-app-translate-plugin-tatoeba))
 -   [x] [ECDICT](https://github.com/skywind3000/ECDICT) ([插件](https://github.com/pot-app/pot-app-translate-plugin-ecdict))
 
@@ -157,8 +156,6 @@ Ubuntu 24.04+、Fedora 40+、Arch 等早已移除该库，因此上游源码在�
 更多接口支持见 [插件系统](#插件系统)
 
 ## 语音合成
-
--   [x] [Lingva](https://github.com/thedaviddelta/lingva-translate)
 
 更多接口支持见 [插件系统](#插件系统)
 
