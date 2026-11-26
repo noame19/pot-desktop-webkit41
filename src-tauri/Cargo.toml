@@ -65,3 +65,9 @@ custom-protocol = ["tauri/custom-protocol"]
 webkit2gtk = { path = "vendor/webkit2gtk" }
 wry = { path = "vendor/wry" }
 soup2-sys = { path = "vendor/soup2-sys" }
+# screenshots 0.7.2 assumes every portal screenshot comes back as RGBA. KDE
+# hands back RGB (colortype=2), so the Wayland path reads three-byte pixels with
+# a four-byte stride and the image turns into noise. The vendored copy decodes
+# through the png crate instead and reports the frame's real pixel size.
+# See vendor/PATCHES.md.
+screenshots = { path = "vendor/screenshots" }

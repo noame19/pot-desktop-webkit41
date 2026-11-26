@@ -21,6 +21,7 @@ untouched and moves only the two GUI crates onto 4.1.
 webkit2gtk = { path = "vendor/webkit2gtk" }
 wry = { path = "vendor/wry" }
 soup2-sys = { path = "vendor/soup2-sys" }
+screenshots = { path = "vendor/screenshots" }
 ```
 
 ### `vendor/webkit2gtk` (0.18.2)
@@ -52,6 +53,30 @@ soup2-sys = { path = "vendor/soup2-sys" }
   and libsoup3 aborts the process if libsoup2 is loaded next to it
   (`libsoup3 symbols detected. Using libsoup2 and libsoup3 in the same process
   is not supported.`), so the library must not be linked at all.
+
+### `vendor/screenshots` (0.7.2)
+
+Upstream bug, hit on KDE: `src/linux/wayland_screenshot.rs` decoded the portal
+screenshot PNG by hand and assumed four bytes per pixel. KDE's portal writes
+**RGB** (`colortype=2`, three bytes per pixel), so every pixel was read one byte
+out of phase and the image became coloured noise. GNOME happens to write RGBA,
+which is why the bug went unnoticed upstream.
+
+Changes:
+
+* `decode_png_rgba` decodes through the `png` crate (with `EXPAND`), then
+  converts greyscale / grey+alpha / RGB / RGBA to packed RGBA8. Palette and
+  16 bit inputs are handled instead of indexed out of bounds.
+* `crop_rgba` clamps the requested rectangle to the frame and returns the real
+  cropped size; the caller uses that size instead of
+  `display_info.width * scale_factor` (1646 × 1.75 = 2880.5, KDE writes 2881, so
+  the arithmetic leaves every row a pixel short of the real stride).
+* `Image::from_rgba8` asserts the buffer matches `width * height * 4`,
+  so a size mismatch fails at the source instead of producing a truncated PNG.
+* The portal `handle_token` is unique per call (`1234` was reused and rejected
+  while a previous request was still in flight).
+* Multi-monitor: the portal returns the stitched desktop, so the requested
+  monitor is cut out of it (single monitor needs no crop).
 
 ## Build recipe (Debian 13, arm64)
 

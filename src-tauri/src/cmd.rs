@@ -38,6 +38,22 @@ pub fn cut_image(left: u32, top: u32, width: u32, height: u32, app_handle: tauri
             return;
         }
     };
+
+    // The selection arrives in device pixels computed from the on-screen image.
+    // Rounding can put the right/bottom edge one pixel past the real image (KDE
+    // asks for 2880x1800 while the portal frame is 2881x1801), and sub_image
+    // panics on out of bounds, which would kill the process mid-capture.
+    let img_width = img.width();
+    let img_height = img.height();
+    let left = left.min(img_width.saturating_sub(1));
+    let top = top.min(img_height.saturating_sub(1));
+    let width = width.min(img_width - left);
+    let height = height.min(img_height - top);
+    if width == 0 || height == 0 {
+        error!("Cut area is empty inside a {}x{} image", img_width, img_height);
+        return;
+    }
+
     let img2 = img.sub_image(left, top, width, height);
     app_cache_dir_path.pop();
     app_cache_dir_path.push("pot_screenshot_cut.png");

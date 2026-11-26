@@ -21,13 +21,18 @@ export default function Screenshot() {
     useEffect(() => {
         currentMonitor().then((monitor) => {
             const position = monitor.position;
-            invoke('screenshot', { x: position.x, y: position.y }).then(() => {
-                appCacheDir().then((appCacheDirPath) => {
-                    join(appCacheDirPath, 'pot_screenshot.png').then((filePath) => {
-                        setImgurl(convertFileSrc(filePath));
+            invoke('screenshot', { x: position.x, y: position.y })
+                .then(() => {
+                    appCacheDir().then((appCacheDirPath) => {
+                        join(appCacheDirPath, 'pot_screenshot.png').then((filePath) => {
+                            setImgurl(convertFileSrc(filePath));
+                        });
                     });
+                })
+                .catch(async (e) => {
+                    warn(`Screenshot failed: ${e}`);
+                    await appWindow.close();
                 });
-            });
         });
     }, []);
 

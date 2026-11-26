@@ -4,7 +4,8 @@ import { fetch } from '@tauri-apps/api/http';
 // 2026-08 起微软下线了旧的 token 接口（https://edge.microsoft.com/translate/auth 返回 404），
 // 改成同域名下免鉴权的 translatetext 端点：直接 POST 文本数组即可。
 // 参考：https://github.com/zhp2333/pot-app-translate-plugin-edge-translate
-const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0';
+const UA =
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0';
 
 export async function translate(text, from, to) {
     // 该接口不接受 from=auto，留空即为自动识别
