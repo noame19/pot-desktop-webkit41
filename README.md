@@ -125,7 +125,6 @@ Ubuntu 24.04+、Fedora 40+、Arch 等早已移除该库，因此上游源码在�
 -   [x] [小牛翻译](https://niutrans.com/)
 -   [x] [Google](https://translate.google.com)
 -   [x] [Bing](https://learn.microsoft.com/zh-cn/azure/cognitive-services/translator/)
--   [x] [Bing 词典](https://www.bing.com/dict)
 -   [x] [DeepL](https://www.deepl.com/)
 -   [x] [有道翻译](https://ai.youdao.com/)
 -   [x] [剑桥词典](https://dictionary.cambridge.org/)

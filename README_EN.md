@@ -93,7 +93,6 @@
 -   [x] [NiuTrans](https://niutrans.com/)
 -   [x] [Google Translate](https://translate.google.com)
 -   [x] [Bing Translate](https://learn.microsoft.com/zh-cn/azure/cognitive-services/translator/)
--   [x] [Bing Dictionary](https://www.bing.com/dict)
 -   [x] [DeepL](https://www.deepl.com/)
 -   [x] [Youdao](https://ai.youdao.com/)
 -   [x] [Cambridge Dictionary](https://dictionary.cambridge.org/)
