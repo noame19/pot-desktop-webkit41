@@ -1,62 +1,43 @@
 import { fetch } from '@tauri-apps/api/http';
 
-export async function translate(text, from, to) {
-    const token_url = 'https://edge.microsoft.com/translate/auth';
+// 微软 Edge 浏览器内置翻译接口。
+// 2026-08 起微软下线了旧的 token 接口（https://edge.microsoft.com/translate/auth 返回 404），
+// 改成同域名下免鉴权的 translatetext 端点：直接 POST 文本数组即可。
+// 参考：https://github.com/zhp2333/pot-app-translate-plugin-edge-translate
+const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0';
 
-    let token = await fetch(token_url, {
-        method: 'GET',
+export async function translate(text, from, to) {
+    // 该接口不接受 from=auto，留空即为自动识别
+    const source = from === 'auto' ? '' : from;
+
+    const url =
+        'https://edge.microsoft.com/translate/translatetext' +
+        `?from=${encodeURIComponent(source)}&to=${encodeURIComponent(to)}&isEnterpriseClient=false`;
+
+    const res = await fetch(url, {
+        method: 'POST',
         headers: {
-            'User-Agent':
-                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42',
+            'content-type': 'application/json',
+            // 不带浏览器 UA 会返回 400 "Client Browser Version not supported"
+            'User-Agent': UA,
         },
-        responseType: 2,
+        // 该端点接受字符串数组，返回结果按位置一一对应
+        body: {
+            type: 'Json',
+            payload: [text],
+        },
     });
 
-    if (token.ok) {
-        const url = 'https://api-edge.cognitive.microsofttranslator.com/translate';
-
-        let res = await fetch(url, {
-            method: 'POST',
-            headers: {
-                accept: '*/*',
-                'accept-language': 'zh-TW,zh;q=0.9,ja;q=0.8,zh-CN;q=0.7,en-US;q=0.6,en;q=0.5',
-                authorization: 'Bearer ' + token.data,
-                'cache-control': 'no-cache',
-                'content-type': 'application/json',
-                pragma: 'no-cache',
-                'sec-ch-ua': '"Microsoft Edge";v="113", "Chromium";v="113", "Not-A.Brand";v="24"',
-                'sec-ch-ua-mobile': '?0',
-                'sec-ch-ua-platform': '"Windows"',
-                'sec-fetch-dest': 'empty',
-                'sec-fetch-mode': 'cors',
-                'sec-fetch-site': 'cross-site',
-                Referer: 'https://appsumo.com/',
-                'Referrer-Policy': 'strict-origin-when-cross-origin',
-                'User-Agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36 Edg/113.0.1774.42',
-            },
-            query: {
-                from: from,
-                to: to,
-                'api-version': '3.0',
-                includeSentenceLength: 'true',
-            },
-            body: { type: 'Json', payload: [{ Text: text }] },
-        });
-
-        if (res.ok) {
-            let result = res.data;
-            if (result[0].translations) {
-                return result[0].translations[0].text.trim();
-            } else {
-                throw JSON.stringify(result);
-            }
-        } else {
-            throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
-        }
-    } else {
-        throw 'Get Token Failed';
+    if (!res.ok) {
+        throw `Http Request Error\nHttp Status: ${res.status}\n${JSON.stringify(res.data)}`;
     }
+
+    const result = res.data;
+    const translated = result?.[0]?.translations?.[0]?.text;
+    if (!translated) {
+        throw JSON.stringify(result);
+    }
+    return translated.trim();
 }
 
 export * from './Config';

@@ -6,7 +6,7 @@ export const info = {
 export enum Language {
     auto = 'auto',
     zh_cn = 'ZH',
-    zh_tw = 'ZH',
+    zh_tw = 'ZH-HANT',
     ja = 'JA',
     en = 'EN',
     ko = 'KO',
